@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Befamka - Surabaya</title>
+    <!-- Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Gaya tambahan untuk teks judul agar lebih menarik dan bergradasi */
+        .brand-title {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-emerald-50/30 text-gray-800 font-sans min-h-screen pb-32">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-emerald-100 sticky top-0 z-50 px-4 py-3 shadow-xs">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-black tracking-wider uppercase brand-title">Befamka</h1>
+                <p class="text-xs font-medium text-emerald-700 tracking-wide mt-0.5">Menjual Air Minum Kemasan Galon</p>
+                <p class="text-[10px] text-gray-400">Surabaya</p>
+            </div>
+            
+            <!-- Tombol / Widget CS WhatsApp di Header -->
+            <a href="#" id="cs-header-link" onclick="openCSWhatsApp(event)" class="flex items-center space-x-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full transition shadow-2xs">
+                <!-- Avatar Kartun Pria / Customer Service -->
+                <div class="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xs overflow-hidden flex-shrink-0 shadow-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                    </svg>
+                </div>
+                <div class="text-left leading-tight">
+                    <p class="text-[9px] text-emerald-600 font-medium">Butuh Bantuan?</p>
+                    <p class="text-xs font-semibold text-gray-800">Hubungi kami disini</p>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content: Katalog Produk -->
+    <main class="max-w-4xl mx-auto p-4">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-3 px-1">Katalog Produk</h2>
+        
+        <!-- Grid Katalog (3 Kolom di layar sedang/besar) -->
+        <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <!-- Produk akan dimuat secara otomatis oleh JavaScript -->
+        </div>
+    </main>
+
+    <!-- Bagian Akhir: Rincian & Total Belanja (Sticky di bawah layar) -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-emerald-100 p-4 shadow-lg z-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rincian Belanja:</span>
+                <span id="cart-count" class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">0 Item</span>
+            </div>
+            
+            <!-- Daftar Ringkasan Item yang Dipilih -->
+            <div id="cart-summary" class="max-h-24 overflow-y-auto text-xs text-gray-600 mb-2 divide-y divide-gray-50">
+                <p class="text-gray-400 italic py-1">Belum ada produk dipilih.</p>
+            </div>
+
+            <!-- Total & Tombol Kirim WhatsApp -->
+            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                <div>
+                    <p class="text-[11px] text-gray-500 font-medium">Total Pembayaran:</p>
+                    <p id="cart-total" class="text-base font-bold text-emerald-800">Rp 0</p>
+                </div>
+                <button onclick="checkoutWhatsApp()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm active:scale-95">
+                    Kirim Pesanan ke WA
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logika Aplikasi (JavaScript) -->
+    <script>
+        // Data Produk (Dapat disesuaikan termasuk produk air galon)
+        const products = [
+            { id: 1, name: "Aqua 19 Liter", price: 20000, image: "https://parto.id/asset/foto_produk/1f767ba89ab25913574b34a55deec992.jpg?w=300&auto=format&fit=crop&q=60" }
+        ];
+
+        let cart = {};
+
+        // =========================================================================
+        // NOMOR WHATSAPP UTAMA TOKO (Ganti dengan nomor Anda di sini)
+        // Format: Awali dengan kode negara tanpa tanda "+" (Contoh: 628123456789)
+        // =========================================================================
+        const phone = "628993797725"; 
+
+        // Render Katalog Produk
+        function renderProducts() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const qty = cart[product.id] || 0;
+                
+                const card = document.createElement('div');
+                card.className = "bg-white border border-emerald-100 rounded-xl p-3 flex justify-between items-center shadow-2xs hover:border-emerald-300 transition";
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 text-left">
+                        <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg border border-gray-100 flex-shrink-0">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-800 line-clamp-1">${product.name}</p>
+                            <p class="text-xs font-bold text-emerald-700 mt-0.5">Rp ${product.price.toLocaleString('id-ID')}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center space-y-1.5 pl-3 flex-shrink-0">
+                        <div class="flex items-center space-x-1">
+                            <button onclick="updateQty(${product.id}, -1)" class="w-7 h-7 bg-emerald-50 text-emerald-800 rounded-md flex items-center justify-center font-bold hover:bg-emerald-100 transition">-</button>
+                            <span id="qty-${product.id}" class="w-6 text-center text-xs font-bold">${qty}</span>
+                            <button onclick="updateQty(${product.id}, 1)" class="w-7 h-7 bg-emerald-600 text-white rounded-md flex items-center justify-center font-bold hover:bg-emerald-700 transition shadow-2xs">+</button>
+                        </div>
+                        <span class="text-[9px] text-gray-400 uppercase tracking-tight font-medium">Jumlah</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Fungsi Mengubah Jumlah Pembelian
+        function updateQty(productId, change) {
+            if (!cart[productId]) {
+                cart[productId] = 0;
+            }
+            cart[productId] += change;
+            
+            if (cart[productId] <= 0) {
+                delete cart[productId];
+            }
+
+            renderProducts();
+            updateCartSummary();
+        }
+
+        // Update Bagian Rincian Belanja di Bawah
+        function updateCartSummary() {
+            const summaryContainer = document.getElementById('cart-summary');
+            const totalElement = document.getElementById('cart-total');
+            const countElement = document.getElementById('cart-count');
+            
+            summaryContainer.innerHTML = '';
+            let total = 0;
+            let totalItems = 0;
+            let hasItems = false;
+
+            for (let id in cart) {
+                if (cart[id] > 0) {
+                    hasItems = true;
+                    const product = products.find(p => p.id == id);
+                    const subtotal = product.price * cart[id];
+                    total += subtotal;
+                    totalItems += cart[id];
+
+                    const itemRow = document.createElement('div');
+                    itemRow.className = "flex justify-between py-1 px-1";
+                    itemRow.innerHTML = `
+                        <span class="text-gray-700">${product.name} (x${cart[id]})</span>
+                        <span class="font-semibold text-gray-900">Rp ${subtotal.toLocaleString('id-ID')}</span>
+                    `;
+                    summaryContainer.appendChild(itemRow);
+                }
+            }
+
+            if (!hasItems) {
+                summaryContainer.innerHTML = `<p class="text-gray-400 italic py-1 px-1">Belum ada produk dipilih.</p>`;
+            }
+
+            countElement.innerText = `${totalItems} Item`;
+            totalElement.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        // Fungsi Tombol Bantuan / CS WhatsApp di Header
+        function openCSWhatsApp(event) {
+            event.preventDefault();
+            const message = encodeURIComponent("Halo Admin Befamka Surabaya, saya butuh bantuan terkait produk air minum galon.");
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
+
+        // Kirim Rincian Pesanan ke WhatsApp
+        function checkoutWhatsApp() {
+            let hasItems = false;
+            for (let id in cart) {
+                if (cart[id] > 0) {
+                    hasItems = true;
+                    break;
+                }
+            }
+
+            if (!hasItems) {
+                alert("Silakan pilih produk terlebih dahulu sebelum mengirim pesanan.");
+                return;
+            }
+
+            let message = "Halo Befamka Surabaya, saya ingin memesan produk berikut:\n\n";
+            let total = 0;
+
+            for (let id in cart) {
+                if (cart[id] > 0) {
+                    const product = products.find(p => p.id == id);
+                    const subtotal = product.price * cart[id];
+                    total += subtotal;
+                    message += `- ${product.name} (x${cart[id]}) : Rp ${subtotal.toLocaleString('id-ID')}\n`;
+                }
+            }
+
+            message += `\n*Total Belanja: Rp ${total.toLocaleString('id-ID')}*\n\nTerima kasih!`;
+
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
